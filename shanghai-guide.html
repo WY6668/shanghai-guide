@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海上繁华 · 上海吃喝玩乐指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+  :root{
+    --ink:#fdeaf1;
+    --ink-2:#f8d6e6;
+    --brass:#c9a227;
+    --brass-soft:#e6c869;
+    --jade:#2f6b5e;
+    --rose:#e8536b;
+    --paper:#fbe4ec;
+    --paper-2:#f6d0dd;
+    --ivory:#fff5f8;
+    --text-dark:#4a1530;
+    --line: rgba(201,162,39,0.35);
+    --shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--text-dark);
+    font-family:'Noto Sans SC', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Noto Serif SC', serif;
+    letter-spacing:0.02em;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:inherit;}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(253,234,241,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1100px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px;
+    gap:12px;
+  }
+  .nav-brand{
+    color:var(--text-dark); font-weight:700; font-size:1.05rem;
+    display:flex; align-items:center; gap:10px;
+    white-space:nowrap;
+  }
+  .nav-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 10px var(--rose);flex-shrink:0;}
+  .nav-right{display:flex; align-items:center; gap:6px;}
+  .nav-links{display:flex; gap:6px;}
+  .nav-links a{
+    color:rgba(74,21,48,0.65);
+    text-decoration:none;
+    font-size:0.98rem;
+    padding:8px 16px;
+    border-radius:999px;
+    transition:all .25s ease;
+    border:1px solid transparent;
+  }
+  .nav-links a:hover{
+    color:var(--brass);
+    border-color:var(--line);
+    background:rgba(201,162,39,0.1);
+  }
+  .lang-toggle{
+    margin-left:8px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.5);
+    color:var(--text-dark);
+    font-weight:700;
+    font-size:0.82rem;
+    padding:7px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    letter-spacing:0.05em;
+    transition:all .2s ease;
+    font-family:'Noto Sans SC', sans-serif;
+  }
+  .lang-toggle:hover{ background:rgba(201,162,39,0.15); border-color:var(--brass); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    background:linear-gradient(180deg,var(--ink) 0%, var(--ink-2) 70%, var(--ink) 100%);
+    color:var(--text-dark);
+    overflow:hidden;
+    padding:100px 24px 0;
+  }
+  .hero-inner{
+    max-width:1100px; margin:0 auto;
+    position:relative; z-index:2;
+    text-align:center;
+  }
+  .hero .eyebrow{
+    color:var(--brass);
+    letter-spacing:0.35em;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem, 7vw, 5.2rem);
+    line-height:1.15;
+    margin:0 0 20px;
+    font-weight:900;
+    background:linear-gradient(180deg,var(--brass-soft) 0%, var(--brass) 55%, #9a6a16 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 2px 30px rgba(74,21,48,0.12);
+  }
+  .hero p.lead{
+    max-width:560px; margin:0 auto 40px;
+    color:rgba(74,21,48,0.7);
+    font-size:1.08rem; line-height:1.9;
+  }
+  .hero-tags{
+    display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+    margin-bottom:64px;
+  }
+  .hero-tags span{
+    border:1px solid var(--line);
+    color:var(--brass);
+    padding:10px 22px;
+    border-radius:999px;
+    font-size:1.15rem;
+    font-family:'Noto Serif SC',serif;
+    font-weight:700;
+    background:rgba(201,162,39,0.08);
+  }
+  .skyline{display:block; width:100%; height:auto;}
+  .skyline .glow{filter:drop-shadow(0 0 6px rgba(233,120,80,0.55));}
+  .skyline .glow-jade{filter:drop-shadow(0 0 6px rgba(64,180,150,0.5));}
+
+  /* ---------- DIVIDER ---------- */
+  .divider{ width:100%; display:block; }
+
+  /* ---------- SECTIONS ---------- */
+  section.category{
+    padding:90px 24px 60px;
+    max-width:1100px; margin:0 auto;
+  }
+  .cat-head{
+    display:flex; align-items:baseline; gap:22px;
+    margin-bottom:8px;
+    border-bottom:1px solid rgba(11,18,32,0.15);
+    padding-bottom:24px;
+  }
+  .cat-glyph{
+    font-family:'Noto Serif SC',serif;
+    font-size:4.2rem; font-weight:900;
+    line-height:1;
+  }
+  .cat-title-en{
+    font-size:0.85rem; letter-spacing:0.25em; text-transform:uppercase;
+    color:rgba(11,18,32,0.55); margin-bottom:6px;
+  }
+  .cat-title{
+    font-size:1.6rem; font-weight:700;
+  }
+  .cat-desc{
+    max-width:640px; color:rgba(11,18,32,0.65); line-height:1.9; margin:22px 0 40px;
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+    gap:20px;
+  }
+  .card{
+    background:var(--ivory);
+    border:1px solid rgba(11,18,32,0.08);
+    border-radius:4px;
+    padding:26px 24px;
+    position:relative;
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:var(--shadow); }
+  .card .tag{
+    display:inline-block;
+    font-size:0.72rem; letter-spacing:0.12em;
+    color:#fff; background:var(--jade);
+    padding:3px 10px; border-radius:2px;
+    margin-bottom:14px;
+  }
+  .card.eat .tag{background:var(--rose);}
+  .card.drink .tag{background:#3a5a7a;}
+  .card.see .tag{background:var(--jade);}
+  .card.play .tag{background:var(--brass);}
+  .card h3{
+    margin:0 0 10px; font-size:1.2rem; font-weight:700;
+  }
+  .card p{
+    margin:0 0 12px; line-height:1.85; color:rgba(11,18,32,0.72); font-size:0.95rem;
+  }
+  .card .meta{
+    font-size:0.82rem; color:rgba(11,18,32,0.5);
+    display:flex; gap:14px; flex-wrap:wrap;
+    border-top:1px dashed rgba(11,18,32,0.15);
+    padding-top:12px; margin-top:14px;
+  }
+
+  /* alternate section backgrounds */
+  .bg-dark{
+    background:var(--ink); color:var(--text-dark);
+  }
+  .bg-dark .cat-desc{color:rgba(74,21,48,0.65);}
+  .bg-dark .cat-head{border-color:rgba(74,21,48,0.15);}
+  .bg-dark .cat-title-en{color:rgba(74,21,48,0.5);}
+  .bg-dark .card{
+    background:var(--ink-2); border-color:rgba(74,21,48,0.08); color:var(--text-dark);
+  }
+  .bg-dark .card p{color:rgba(74,21,48,0.7);}
+  .bg-dark .card .meta{color:rgba(74,21,48,0.5); border-color:rgba(74,21,48,0.12);}
+
+  /* ---------- TIPS ---------- */
+  .tips{
+    background:var(--paper-2);
+    padding:90px 24px;
+  }
+  .tips-inner{max-width:1100px; margin:0 auto;}
+  .tips-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
+    gap:28px;
+    margin-top:40px;
+  }
+  .tip-block h4{
+    font-family:'Noto Serif SC',serif;
+    font-size:1.05rem; margin:0 0 12px;
+    color:var(--jade);
+    display:flex; align-items:center; gap:10px;
+  }
+  .tip-block h4::before{
+    content:''; width:20px; height:2px; background:var(--brass);
+    display:inline-block;
+  }
+  .tip-block p, .tip-block li{
+    color:rgba(11,18,32,0.7); line-height:1.9; font-size:0.94rem;
+  }
+  .tip-block ul{padding-left:20px; margin:0;}
+
+  .itinerary{
+    margin-top:60px;
+    background:var(--ink-2);
+    color:var(--text-dark);
+    border-radius:6px;
+    padding:36px 32px;
+  }
+  .itinerary h4{
+    font-family:'Noto Serif SC',serif; color:var(--brass);
+    margin:0 0 24px; font-size:1.2rem;
+  }
+  .day-row{
+    display:grid; grid-template-columns:90px 1fr;
+    gap:20px; padding:16px 0;
+    border-bottom:1px solid rgba(74,21,48,0.12);
+  }
+  .day-row:last-child{border-bottom:none;}
+  .day-label{
+    font-family:'JetBrains Mono',monospace; color:var(--rose); font-weight:500;
+  }
+  .day-row p{margin:0; color:rgba(74,21,48,0.75); line-height:1.8; font-size:0.94rem;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--ink);
+    color:rgba(74,21,48,0.55);
+    text-align:center;
+    padding:40px 24px 50px;
+    font-size:0.85rem;
+    border-top:1px solid rgba(74,21,48,0.1);
+  }
+  footer .brand{color:var(--brass); font-family:'Noto Serif SC',serif; font-size:1.1rem; margin-bottom:10px;}
+
+  /* ---------- WEATHER WIDGET ---------- */
+  .weather{
+    max-width:340px; margin:0 auto 56px;
+    background:rgba(255,255,255,0.55);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px 26px;
+    display:flex; align-items:center; gap:18px;
+    text-align:left;
+  }
+  .weather .w-icon{font-size:2.6rem; line-height:1; filter:drop-shadow(0 0 8px rgba(201,162,39,0.4));}
+  .weather .w-main{flex:1;}
+  .weather .w-temp{font-family:'Noto Serif SC',serif; font-size:1.9rem; font-weight:700; color:var(--brass); line-height:1;}
+  .weather .w-desc{font-size:0.85rem; color:rgba(74,21,48,0.7); margin-top:6px;}
+  .weather .w-meta{font-size:0.76rem; color:rgba(74,21,48,0.55); margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;}
+  .weather .w-loading{font-size:0.85rem; color:rgba(74,21,48,0.7);}
+  .weather .w-tip{
+    margin-top:8px; font-size:0.78rem; color:var(--rose);
+    border-top:1px dashed rgba(74,21,48,0.15); padding-top:8px;
+  }
+
+  /* ---------- LIVE SEARCH ---------- */
+  .search-bar{
+    position:sticky; top:57px; z-index:40;
+    background:rgba(251,228,236,0.96);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(11,18,32,0.1);
+    padding:14px 24px;
+  }
+  .search-inner{
+    max-width:1100px; margin:0 auto;
+    display:flex; align-items:center; gap:14px;
+  }
+  .search-inner input{
+    flex:1;
+    border:1px solid rgba(11,18,32,0.2);
+    background:var(--ivory);
+    border-radius:999px;
+    padding:11px 20px;
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:0.95rem;
+    color:var(--text-dark);
+    outline:none;
+    transition:border-color .2s ease;
+  }
+  .search-inner input:focus{border-color:var(--brass);}
+  .search-count{
+    font-size:0.8rem; color:rgba(11,18,32,0.55);
+    white-space:nowrap; min-width:76px; text-align:right;
+  }
+  .card.is-hidden{display:none;}
+  .no-results{
+    display:none;
+    text-align:center;
+    padding:60px 20px;
+    color:rgba(11,18,32,0.45);
+    font-size:0.95rem;
+  }
+  .no-results.show{display:block;}
+
+  /* ---------- OVERVIEW MAP ---------- */
+  .map-overview{
+    width:100%; height:380px;
+    border-radius:6px;
+    border:1px solid rgba(11,18,32,0.12);
+    margin:0 0 40px;
+    overflow:hidden;
+  }
+  .leaflet-popup-content{ font-family:'Noto Sans SC', sans-serif; }
+  .leaflet-popup-content b{ font-family:'Noto Serif SC', serif; color:var(--text-dark); }
+  .map-link{
+    color:var(--jade) !important;
+    font-weight:600;
+    text-decoration:none;
+    border-bottom:1px dashed var(--jade);
+  }
+  .map-link:hover{ color:var(--brass) !important; border-color:var(--brass); }
+  .xhs-link{
+    color:var(--rose) !important;
+    font-weight:600;
+    text-decoration:none;
+    border-bottom:1px dashed var(--rose);
+  }
+  .xhs-link:hover{ color:#c23a52 !important; border-color:#c23a52; }
+
+  @media (max-width:640px){
+    .nav-links{display:none;}
+    .cat-glyph{font-size:3rem;}
+    .hero{padding-top:70px;}
+    .weather{flex-direction:column; text-align:center;}
+    .search-bar{top:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .card{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand"><span class="dot"></span><span data-en="Shanghai After Hours">海上繁华 Shanghai</span></div>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#eat" data-en="Eat">吃</a>
+        <a href="#drink" data-en="Drink">喝</a>
+        <a href="#play" data-en="Play">玩</a>
+        <a href="#fun" data-en="Fun">乐</a>
+        <a href="#tips" data-en="Tips">贴士</a>
+      </div>
+      <button class="lang-toggle" id="langToggle" type="button">EN</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">SHANGHAI · CITY GUIDE</div>
+    <h1 data-en="Shanghai After Hours">海上繁华</h1>
+    <p class="lead" data-en="From the international architecture of the Bund to a steaming basket of soup dumplings in a back lane, from an old jazz band to neon reflected on the Huangpu River — this is a guide to Shanghai's food, drinks, sights and nightlife.">从外滩的万国建筑到弄堂里的一碗生煎，从爵士老乐队到黄浦江上的霓虹倒影——这是一份写给旅人的上海吃喝玩乐指南。</p>
+    <div class="hero-tags">
+      <span data-en="Eat">吃</span><span data-en="Drink">喝</span><span data-en="Play">玩</span><span data-en="Fun">乐</span>
+    </div>
+
+    <div class="weather" id="weather">
+      <div class="w-icon" id="wIcon">🌤️</div>
+      <div class="w-main">
+        <div class="w-loading" id="wLoading" data-en="Fetching Shanghai's live weather…">正在获取上海实时天气…</div>
+        <div class="w-temp" id="wTemp" style="display:none;"></div>
+        <div class="w-desc" id="wDesc" style="display:none;"></div>
+        <div class="w-meta" id="wMeta" style="display:none;"></div>
+        <div class="w-tip" id="wTip" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+  <svg class="skyline" viewBox="0 0 1200 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <rect x="0" y="0" width="1200" height="220" fill="none"/>
+    <!-- Bund side (left, art-deco silhouettes) -->
+    <g fill="#0e1830" stroke="rgba(201,162,39,0.25)" stroke-width="1">
+      <rect x="0" y="140" width="45" height="80"/>
+      <rect x="45" y="120" width="35" height="100"/>
+      <rect x="82" y="150" width="50" height="70"/>
+      <polygon points="132,150 160,150 160,220 132,220"/>
+      <polygon points="160,110 175,110 175,150 145,150"/>
+      <rect x="175" y="135" width="40" height="85"/>
+      <rect x="215" y="160" width="55" height="60"/>
+      <rect x="270" y="130" width="30" height="90"/>
+      <polygon points="300,130 330,90 360,130 360,220 300,220"/>
+      <rect x="360" y="145" width="45" height="75"/>
+      <rect x="405" y="155" width="60" height="65"/>
+      <rect x="465" y="125" width="35" height="95"/>
+      <polygon points="500,125 520,100 540,125 540,220 500,220"/>
+      <rect x="540" y="150" width="50" height="70"/>
+    </g>
+    <!-- Pudong side (right, glowing towers) -->
+    <g>
+      <rect x="620" y="120" width="18" height="100" fill="#0e1830"/>
+      <rect x="650" y="60" width="14" height="160" fill="#0e1830" class="glow"/>
+      <circle cx="657" cy="45" r="16" fill="none" stroke="#e97850" stroke-width="3" class="glow"/>
+      <circle cx="657" cy="45" r="6" fill="#e97850" class="glow"/>
+      <rect x="690" y="150" width="20" height="70" fill="#0e1830"/>
+      <polygon points="740,20 760,20 770,220 730,220" fill="#0e1830" class="glow-jade" stroke="#40b496" stroke-width="1"/>
+      <rect x="800" y="40" width="26" height="180" fill="#0e1830" stroke="#c9a227" stroke-width="1" class="glow"/>
+      <rect x="806" y="55" width="4" height="150" fill="#c9a227" opacity="0.6"/>
+      <rect x="850" y="90" width="20" height="130" fill="#0e1830"/>
+      <rect x="890" y="130" width="16" height="90" fill="#0e1830"/>
+      <rect x="930" y="70" width="22" height="150" fill="#0e1830" class="glow-jade" stroke="#40b496" stroke-width="1"/>
+      <rect x="970" y="140" width="18" height="80" fill="#0e1830"/>
+      <rect x="1010" y="100" width="24" height="120" fill="#0e1830"/>
+      <rect x="1050" y="150" width="150" height="70" fill="#0e1830"/>
+    </g>
+    <rect x="0" y="218" width="1200" height="2" fill="rgba(201,162,39,0.4)"/>
+  </svg>
+</header>
+
+<div class="search-bar">
+  <div class="search-inner">
+    <input type="text" id="searchInput" placeholder="实时查询：输入店名、地点或关键词，例如「豫园」「爵士」「小笼包」…" data-en-placeholder="Live search: try a place, vibe, or dish — e.g. &quot;Yu Garden&quot;, &quot;jazz&quot;, &quot;dumplings&quot;…">
+    <span class="search-count" id="searchCount"></span>
+  </div>
+</div>
+<div class="no-results" id="noResults" data-en="No matches found — try a different keyword.">没有找到匹配的内容，换个关键词试试～</div>
+
+<!-- 吃 EAT -->
+<section class="category" id="eat">
+  <div class="cat-head">
+    <div class="cat-glyph" style="color:var(--rose)">吃</div>
+    <div>
+      <div class="cat-title-en">Eat · Local Flavors</div>
+      <div class="cat-title" data-en="Local Flavors & Street Food">本帮滋味与街头小吃</div>
+    </div>
+  </div>
+  <p class="cat-desc" data-en="Shanghai's flavor lives deep in the lanes: a basket of juicy soup dumplings, a crisp pan-fried bun, and the rich, sweet-savory sauces of Shanghainese cooking.">上海的味道藏在弄堂深处：一笼汤汁饱满的小笼包，一份焦香的生煎馒头，还有本帮菜里那一口浓油赤酱。</p>
+  <div class="card-grid">
+    <div class="card eat">
+      <span class="tag" data-en="Breakfast">早点</span>
+      <h3 data-en="Sheng Jian (Pan-Fried Buns)">生煎馒头</h3>
+      <p data-en="Golden and crisp on the bottom with a burst of savory broth inside — a classic Old Shanghai breakfast. Xiao Yang Sheng Jian and Da Hu Chun are local go-to spots.">底部煎得金黄酥脆，一口下去汤汁四溢，是老上海人早餐桌上的经典。小杨生煎、大壶春都是本地人常去的老字号。</p>
+      <div class="meta"><span data-en="💰 ~¥30/person">💰 人均 30 元内</span><span data-en="📍 Citywide">📍 遍布全市</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=大壶春(福州路店)&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=大壶春(福州路店)" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Dim Sum">点心</span>
+      <h3 data-en="Nanxiang Soup Dumplings">南翔小笼包</h3>
+      <p data-en="The queue never stops at the Nanxiang Steamed Bun Restaurant on Yu Garden's old street — thin-skinned, richly filled, and a must-visit stop for out-of-town visitors.">豫园老街的南翔馒头店排队常年不断，皮薄馅足、汤汁鲜美，是外地游客到上海必打卡的一站。</p>
+      <div class="meta"><span data-en="💰 ¥60-100/person">💰 人均 60-100 元</span><span data-en="📍 Yu Garden Old Street">📍 豫园老街</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=南翔馒头店(豫园店)&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=南翔馒头店(豫园店)" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Shanghainese">本帮菜</span>
+      <h3 data-en="Rich, Sweet-Savory Shanghainese Classics">浓油赤酱本帮菜</h3>
+      <p data-en="Braised pork belly, oil-drenched prawns, sweet-and-sour ribs — Shanghainese cuisine leans sweet and rich. Try old names like Lao Zheng Xing for the most authentic flavors.">红烧肉、油爆虾、糖醋小排——上海本帮菜偏甜偏浓，老正兴、上海老饭店等老字号能吃到最地道的味道。</p>
+      <div class="meta"><span data-en="💰 ¥100-200/person">💰 人均 100-200 元</span><span data-en="📍 Huangpu & Jing'an">📍 黄浦、静安</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海老饭店(福佑路店)&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海老饭店(福佑路店)" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Late-Night Eats">夜宵</span>
+      <h3 data-en="Yunnan Rd S. / Huanghe Rd Food Streets">云南南路 / 黄河路美食街</h3>
+      <p data-en="Quiet by day, these streets come alive at night with locals lining up for crayfish, skewers and rice porridge — a taste of Shanghai's most down-to-earth nightlife.">白天不起眼的小街，晚上却是本地人排队吃小龙虾、烤串和砂锅粥的热闹去处，适合体验最市井的上海夜生活。</p>
+      <div class="meta"><span data-en="💰 ¥50-80/person">💰 人均 50-80 元</span><span data-en="📍 Huangpu District">📍 黄浦区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=云南南路美食街&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=云南南路美食街" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Sweets">甜品</span>
+      <h3 data-en="Old Shanghai Sweets">上海老式点心</h3>
+      <p data-en="Tiaotou cakes, double-stuffed rice balls, crab-shell pastries — nostalgic sweet bites tucked into old bakeries around the City God Temple, perfect for snacking while you stroll.">条头糕、双酿团、蟹壳黄——藏在城隍庙和老字号糕点铺里的甜口回忆，适合边逛边吃。</p>
+      <div class="meta"><span data-en="💰 ¥20-40/person">💰 人均 20-40 元</span><span data-en="📍 Around City God Temple">📍 城隍庙周边</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海城隍庙&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海城隍庙" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Craft Coffee">精品咖啡</span>
+      <h3 data-en="Café Culture">咖啡馆文化</h3>
+      <p data-en="Shanghai has one of the highest café densities in China, from tiny lane-house roasters to corner specialty coffee shops — there's always somewhere to sit down for a cup.">上海是中国咖啡馆密度最高的城市之一，从弄堂里的小众烘焙工作室到街角的精品咖啡店，随处都能坐下喝一杯。</p>
+      <div class="meta"><span data-en="💰 ¥30-50/person">💰 人均 30-50 元</span><span data-en="📍 Anfu Rd & Wukang Rd area">📍 安福路、武康路一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海武康路&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海武康路" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Family-Friendly">亲子</span>
+      <h3 data-en="Mall Food Courts & Family Restaurants">商场亲子餐厅</h3>
+      <p data-en="Shopping-mall food floors are a reliable choice with kids — high chairs, kids' menus, and enough variety that everyone in the family finds something they like.">商场里的美食层是带娃就餐的稳妥选择,有儿童椅、儿童餐,品类也丰富,一家人总能找到爱吃的。</p>
+      <div class="meta"><span data-en="💰 ¥50-120/person">💰 人均 50-120 元</span><span data-en="📍 Jing'an Kerry Centre / Global Harbor">📍 静安嘉里中心、环球港等</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海静安嘉里中心&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海静安嘉里中心" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card eat">
+      <span class="tag" data-en="Family Activity">亲子体验</span>
+      <h3 data-en="Dumpling & Pastry-Making Workshops">包馄饨/做点心体验</h3>
+      <p data-en="Some lane-house restaurants and cultural centers offer hands-on dumpling or pastry workshops — a fun, hands-on way for kids to connect with Shanghainese food culture.">部分弄堂餐厅和文化体验馆提供包馄饨、做点心的亲子手作课程,让孩子动手感受上海饮食文化,趣味性强。</p>
+      <div class="meta"><span data-en="💰 ¥80-200/person">💰 人均 80-200 元</span><span data-en="📍 Xintiandi / Tianzifang area">📍 新天地、田子坊一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海新天地&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海新天地" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 喝 DRINK -->
+<section class="category bg-dark" id="drink">
+  <div class="cat-head">
+    <div class="cat-glyph" style="color:var(--brass)">喝</div>
+    <div>
+      <div class="cat-title-en">Drink · Bund Nights</div>
+      <div class="cat-title" data-en="Bars, Jazz & Old Teahouses">酒吧、爵士与老茶馆</div>
+    </div>
+  </div>
+  <p class="cat-desc" data-en="After dark, Shanghai puts on a different face: rooftop cocktail glasses along the Bund catch the neon across the river, while hidden bars in the lanes tell another side of the city's story.">夜幕降临后的上海换上另一副面孔：外滩楼顶的鸡尾酒杯映着江对岸的霓虹，弄堂深处的隐藏酒吧则讲述着另一种上海故事。</p>
+  <div class="card-grid">
+    <div class="card drink">
+      <span class="tag" data-en="Rooftop Bars">楼顶酒吧</span>
+      <h3 data-en="Bund Skyline Rooftop Bars">外滩天际线酒吧</h3>
+      <p data-en="Rooftop bars overlooking both banks of the Huangpu River are the calling card of Shanghai nightlife — perfect for a sunset cocktail as the lights switch on one by one.">坐拥黄浦江两岸夜景的楼顶酒吧是上海夜生活的名片，适合日落时分点一杯鸡尾酒，看灯光次第亮起。</p>
+      <div class="meta"><span data-en="💰 ¥150-300/person">💰 人均 150-300 元</span><span data-en="📍 Along the Bund">📍 外滩沿线</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海外滩&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海外滩" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Speakeasies">隐藏酒吧</span>
+      <h3 data-en="Speakeasy-Style Bars">Speakeasy 风情吧</h3>
+      <p data-en="Hidden behind unassuming storefronts, speakeasy bars have become popular in Shanghai in recent years — finding the entrance takes patience, but the cocktails often surprise.">藏在寻常门面之后的隐藏式酒吧近年在上海颇受欢迎，需要一点耐心寻找入口，调酒水准往往令人惊喜。</p>
+      <div class="meta"><span data-en="💰 ¥150-250/person">💰 人均 150-250 元</span><span data-en="📍 Shaanxi Rd S. & Wuyuan Rd area">📍 陕西南路、五原路一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海五原路&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海五原路" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Heritage">老字号</span>
+      <h3 data-en="Peace Hotel Old Jazz Bar">和平饭店老年爵士酒吧</h3>
+      <p data-en="A veteran jazz band plays classic tunes in this Art Deco lobby — order a whiskey and soak up Old Shanghai's modern, glamorous spirit.">历史悠久的爵士乐队在装饰艺术风格的大堂里演奏经典曲目，喝一杯威士忌，感受老上海的摩登气质。</p>
+      <div class="meta"><span data-en="💰 ¥200+/person">💰 人均 200 元起</span><span data-en="📍 Bund, Nanjing Rd E.">📍 南京东路外滩</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海和平饭店&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海和平饭店" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Tea Culture">茶文化</span>
+      <h3 data-en="Mid-Lake Pavilion Teahouse, Yu Garden">豫园湖心亭茶楼</h3>
+      <p data-en="A century-old teahouse sitting in the middle of the Zigzag Bridge — sit by the window with a pot of Longjing tea and watch the crowds pass by, a slower side of Old Shanghai.">坐落在九曲桥中央的百年茶楼，坐在窗边喝一壶龙井，看游人往来，是体验老上海慢生活的好去处。</p>
+      <div class="meta"><span data-en="💰 ¥60-100/person">💰 人均 60-100 元</span><span data-en="📍 Yu Garden Zigzag Bridge">📍 豫园九曲桥</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=豫园湖心亭茶楼&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=豫园湖心亭茶楼" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Neighborhood Nightlife">街区夜生活</span>
+      <h3 data-en="Julu Road 158 Lane">巨鹿路 158 坊</h3>
+      <p data-en="A cluster of small bars in converted lane houses, each with its own distinct style — perfect for hopping between a few spots in one night for a more local kind of nightlife.">由老洋房改建的小型酒吧聚集地，风格各异、体量小巧,适合一晚上串好几家,感受更本地化的夜生活。</p>
+      <div class="meta"><span data-en="💰 ¥100-200/person">💰 人均 100-200 元</span><span data-en="📍 Julu Rd, Jing'an">📍 静安区巨鹿路</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=巨鹿路158坊&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=巨鹿路158坊" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="River Views">江景</span>
+      <h3 data-en="Huangpu River Night Cruise">黄浦江游船夜航</h3>
+      <p data-en="If drinking on land isn't your style, hop on a night cruise and sip a drink on the water while enjoying the light show along both banks — another way to 'drink in' the view.">如果不想在岸上喝酒,不妨登上夜游船,在江面上带着一杯酒欣赏两岸建筑群的灯光秀,是另一种"喝"法。</p>
+      <div class="meta"><span data-en="💰 ¥100-200 (ticket)">💰 票价 100-200 元</span><span data-en="📍 Shiliupu / Bund Pier">📍 十六铺/外滩码头</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=十六铺码头&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=十六铺码头" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Family-Friendly">亲子</span>
+      <h3 data-en="Old-Style Sweet Soup Shops">老字号糖水铺</h3>
+      <p data-en="For an evening out with kids, skip the bars and try an old-style sweet soup shop instead — warm tofu pudding, sesame paste and red bean soup are gentle, kid-friendly treats.">带娃的夜晚不必去酒吧,老字号糖水铺是更合适的选择——豆腐花、芝麻糊、红豆汤口味温和,孩子也爱吃。</p>
+      <div class="meta"><span data-en="💰 ¥15-30/person">💰 人均 15-30 元</span><span data-en="📍 Around City God Temple">📍 城隍庙周边</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海城隍庙&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海城隍庙" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card drink">
+      <span class="tag" data-en="Family-Friendly">亲子</span>
+      <h3 data-en="Bubble Tea & Ice Cream Shops">网红奶茶与冰淇淋店</h3>
+      <p data-en="Trendy bubble tea and ice cream shops line streets like Anfu Road — a fun, low-key evening stop the whole family can enjoy together after a day of sightseeing.">安福路等街区聚集了不少网红奶茶和冰淇淋店,是逛完景点后全家都能享受的轻松晚间小憩。</p>
+      <div class="meta"><span data-en="💰 ¥20-40/person">💰 人均 20-40 元</span><span data-en="📍 Anfu Rd area">📍 安福路一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海安福路&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海安福路" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 玩 PLAY / SEE -->
+<section class="category" id="play">
+  <div class="cat-head">
+    <div class="cat-glyph" style="color:var(--jade)">玩</div>
+    <div>
+      <div class="cat-title-en">See & Explore · Landmarks</div>
+      <div class="cat-title" data-en="Landmarks & Neighborhood Strolls">地标与街区漫游</div>
+    </div>
+  </div>
+  <p class="cat-desc" data-en="From the international architecture of the Bund to shikumen lane houses, Shanghai's urban fabric holds old and new, East and West, side by side.">从万国建筑博览群到石库门弄堂，上海的城市肌理里同时藏着老与新、东与西。</p>
+  <div class="map-overview" id="playMap"></div>
+  <div class="card-grid">
+    <div class="card see">
+      <span class="tag" data-en="Landmark">地标</span>
+      <h3>外滩 The Bund</h3>
+      <p data-en="Historic buildings from around the world line the Huangpu River, facing Lujiazui's skyscrapers across the water — Shanghai's most iconic skyline, striking at both dawn and night.">黄浦江畔的万国建筑群与对岸陆家嘴摩天楼群隔江相望,是上海最经典的城市天际线,清晨与夜晚各有风情。</p>
+      <div class="meta"><span data-en="⏱ 1-2 hrs">⏱ 建议 1-2 小时</span><span data-en="📍 Zhongshan Rd E1, Huangpu">📍 黄浦区中山东一路</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海外滩&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海外滩" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Garden">园林</span>
+      <h3 data-en="Yu Garden & City God Temple">豫园 & 城隍庙</h3>
+      <p data-en="A Ming-dynasty classical garden woven together with the old street shops around it — pavilions, the Zigzag Bridge, and time-honored snack stalls make it a great place to feel Old Shanghai's daily life.">明代古典园林与周边的老街商铺融为一体,亭台楼阁、九曲桥、老字号小吃店,是感受老上海生活气息的好去处。</p>
+      <div class="meta"><span data-en="⏱ 2-3 hrs">⏱ 建议 2-3 小时</span><span data-en="📍 Huangpu District">📍 黄浦区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海豫园&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海豫园" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Pedestrian St.">步行街</span>
+      <h3 data-en="Nanjing Road Pedestrian Street">南京路步行街</h3>
+      <p data-en="A century-old shopping street linking People's Square and the Bund, where time-honored department stores sit alongside international brands — dazzling at night, great for a stroll.">贯通人民广场与外滩的百年商业街,老字号百货与国际品牌并存,夜晚灯光璀璨,适合逛街与观光。</p>
+      <div class="meta"><span data-en="⏱ 1-2 hrs">⏱ 建议 1-2 小时</span><span data-en="📍 Huangpu District">📍 黄浦区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海南京路步行街&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海南京路步行街" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Lane Houses">洋房街区</span>
+      <h3 data-en="Xintiandi & Tianzifang">新天地 & 田子坊</h3>
+      <p data-en="Neighborhoods built from renovated shikumen houses — Xintiandi is polished and fashionable, Tianzifang more artsy and lived-in. Both are great for photos and a coffee break.">石库门建筑改造的街区,新天地精致时尚、田子坊则更为文艺市井,两者都适合拍照与小坐。</p>
+      <div class="meta"><span data-en="⏱ Half a day">⏱ 建议 半天</span><span data-en="📍 Huangpu / Luwan area">📍 黄浦、卢湾一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海新天地&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海新天地" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Theme Park">主题乐园</span>
+      <h3 data-en="Shanghai Disneyland">上海迪士尼乐园</h3>
+      <p data-en="A popular choice for families or couples — book tickets on the official app ahead of time and plan ride reservations to avoid long peak-hour queues.">亲子游或情侣游的热门选择,建议提前在官方 APP 购票并规划好热门项目的预约时间,避开高峰期排队。</p>
+      <div class="meta"><span data-en="⏱ Full day">⏱ 建议 1 整天</span><span data-en="📍 Chuansha, Pudong">📍 浦东川沙</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海迪士尼乐园&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海迪士尼乐园" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Observation">观光</span>
+      <h3 data-en="Lujiazui Observation Decks">陆家嘴观光厅</h3>
+      <p data-en="The Oriental Pearl Tower, Shanghai Tower and other observation decks overlook all of Lujiazui and the Bund — at dusk you can catch both the sunset and the city lights coming on.">东方明珠、上海中心大厦等观光厅可俯瞰整个陆家嘴与外滩,傍晚时段能同时看到日落与万家灯火。</p>
+      <div class="meta"><span data-en="⏱ 1-2 hrs">⏱ 建议 1-2 小时</span><span data-en="📍 Lujiazui, Pudong">📍 浦东陆家嘴</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海东方明珠&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海东方明珠" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Family & Science">亲子科普</span>
+      <h3 data-en="Shanghai Science & Technology Museum">上海科技馆</h3>
+      <p data-en="Interactive exhibits on biology, space and robotics make this one of the best rainy-day or hot-summer options with kids — most zones are hands-on and genuinely fun to explore.">生物、太空、机器人等互动展项丰富,是带娃遇上雨天或酷暑时的最佳去处之一,大部分展区都能动手体验。</p>
+      <div class="meta"><span data-en="⏱ Half a day">⏱ 建议 半天</span><span data-en="📍 Century Ave, Pudong">📍 浦东世纪大道</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海科技馆&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海科技馆" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Family & Science">亲子科普</span>
+      <h3 data-en="Shanghai Natural History Museum">上海自然博物馆</h3>
+      <p data-en="Dinosaur skeletons, a living wall of preserved specimens, and well-designed exhibits on evolution — an engaging, air-conditioned option for curious kids of almost any age.">恐龙骨架、标本墙与生命演化展陈设计精良,是带孩子避暑长知识的好选择,几乎适合各个年龄段。</p>
+      <div class="meta"><span data-en="⏱ 2-3 hrs">⏱ 建议 2-3 小时</span><span data-en="📍 Jing'an District">📍 静安区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海自然博物馆&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海自然博物馆" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card see">
+      <span class="tag" data-en="Family & Outdoors">亲子户外</span>
+      <h3 data-en="Gongqing Forest Park">共青森林公园</h3>
+      <p data-en="A large riverside forest park with lakes, bridges and open lawns — great for a picnic, a bike ride, or just letting kids run around away from the city crowds.">滨江大型森林公园,有湖泊、桥梁与开阔草坪,适合野餐、骑行,让孩子远离人潮尽情奔跑。</p>
+      <div class="meta"><span data-en="⏱ Half a day">⏱ 建议 半天</span><span data-en="📍 Yangpu District">📍 杨浦区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=共青森林公园&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=共青森林公园" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 乐 FUN / ENTERTAINMENT -->
+<section class="category bg-dark" id="fun">
+  <div class="cat-head">
+    <div class="cat-glyph" style="color:var(--rose)">乐</div>
+    <div>
+      <div class="cat-title-en">Entertainment · After Dark</div>
+      <div class="cat-title" data-en="Shows & After-Dark Entertainment">演出与夜晚娱乐</div>
+    </div>
+  </div>
+  <p class="cat-desc" data-en="See the architecture by day, catch a show by night — Shanghai's entertainment scene is rich enough to fill an entire holiday.">白天看建筑,夜晚看表演——上海的娱乐生活丰富到足以填满一整个假期。</p>
+  <div class="card-grid">
+    <div class="card play">
+      <span class="tag" data-en="Acrobatics">杂技</span>
+      <h3 data-en="Shanghai Circus World · ERA">上海马戏城 · 时空之旅</h3>
+      <p data-en="A resident show blending acrobatics, magic and multimedia stagecraft — visually stunning and great for the whole family. Book tickets online ahead of time.">融合杂技、魔术与多媒体舞美的驻场演出,视觉效果震撼,适合全家观看,建议提前在线购票。</p>
+      <div class="meta"><span data-en="🎫 ¥180-680">🎫 票价 180-680 元</span><span data-en="📍 Zhabei District">📍 闸北区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海马戏城&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海马戏城" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="Theatre">剧院演出</span>
+      <h3 data-en="Shanghai Grand Theatre">上海大剧院</h3>
+      <p data-en="Musicals, ballet and symphony concerts rotate through the program — the glass-domed building is itself a work of art, well worth an evening for a proper show.">音乐剧、芭蕾、交响乐轮番上演,建筑本身也是一件玻璃穹顶的艺术品,值得留出一晚欣赏一场正式演出。</p>
+      <div class="meta"><span data-en="🎫 Varies by show">🎫 票价随剧目浮动</span><span data-en="📍 People's Square">📍 人民广场</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海大剧院&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海大剧院" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="River at Night">江上夜景</span>
+      <h3 data-en="Huangpu River Night Cruise">黄浦江夜游</h3>
+      <p data-en="A boat ride to see the light show on both riverbanks — almost every visitor fits this in. Choose a departure right after nightfall as the lights first switch on.">登船看两岸灯光秀,是几乎每位游客都会安排的行程,建议选择夜色刚落、灯光初亮的班次。</p>
+      <div class="meta"><span data-en="🎫 ¥100-200">🎫 票价 100-200 元</span><span data-en="📍 Shiliupu / Bund Pier">📍 十六铺/外滩码头</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=十六铺码头&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=十六铺码头" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag">live house</span>
+      <h3 data-en="Live Music Houses">音乐现场 Live House</h3>
+      <p data-en="Shanghai has a lively independent music scene — venues big and small host local bands and touring international acts year-round, great for anyone who loves a live atmosphere.">上海拥有活跃的独立音乐场景,大大小小的 live house 常年有本地乐队与国际巡演,适合喜欢现场氛围的旅人。</p>
+      <div class="meta"><span data-en="🎫 ¥100-400">🎫 票价 100-400 元</span><span data-en="📍 Jing'an & Xuhui area">📍 静安、徐汇一带</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海静安区&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海静安区" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="Art">艺术展</span>
+      <h3 data-en="M50 Creative Park & Galleries">M50 创意园与画廊</h3>
+      <p data-en="An art district in a converted old textile mill, packed with contemporary galleries and designer studios — great for anyone who loves browsing exhibitions.">旧纺织厂改造的艺术区,聚集了众多当代艺术画廊与设计师工作室,适合喜欢逛展的文艺爱好者。</p>
+      <div class="meta"><span data-en="🎫 Mostly free">🎫 多数免费</span><span data-en="📍 Moganshan Rd, Putuo">📍 普陀区莫干山路</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=M50创意园&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=M50创意园" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="Nostalgia">怀旧</span>
+      <h3 data-en="Old Jazz Band Live">老爵士乐现场</h3>
+      <p data-en="The house band at the Peace Hotel's jazz bar has an average age past 70, playing classic tunes from a century ago — a unique taste of Old Shanghai's modern glamour.">和平饭店老年爵士酒吧的乐队平均年龄超过 70 岁,演奏着上世纪的经典曲目,是感受老上海摩登氛围的独特体验。</p>
+      <div class="meta"><span data-en="🎫 ¥200+ minimum">🎫 低消 200 元起</span><span data-en="📍 Bund, Nanjing Rd E.">📍 南京东路外滩</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海和平饭店&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海和平饭店" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="Family-Friendly">亲子</span>
+      <h3 data-en="LEGOLAND Discovery Center">乐高探索中心</h3>
+      <p data-en="An indoor play space built entirely from LEGO bricks, with rides, a 4D cinema and building workshops — a reliable hit with younger kids, rain or shine.">全乐高积木打造的室内游乐空间,有小型游乐设施、4D影院和拼搭工坊,不论天气如何都很适合带小龄孩子。</p>
+      <div class="meta"><span data-en="🎫 ¥150-250">🎫 票价 150-250 元</span><span data-en="📍 Pudong">📍 浦东新区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=上海乐高探索中心&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=上海乐高探索中心" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+    <div class="card play">
+      <span class="tag" data-en="Family-Friendly">亲子</span>
+      <h3 data-en="Children's Theatre & Puppet Shows">儿童剧院与木偶剧</h3>
+      <p data-en="Puppet shows and children's theatre productions run regularly at dedicated venues — a gentler, daytime-friendly alternative to the jazz bars and rooftop lounges.">专门的儿童剧场常年有木偶剧、儿童剧演出,相比酒吧和楼顶酒廊,是更适合白天带娃观看的温和选择。</p>
+      <div class="meta"><span data-en="🎫 ¥80-200">🎫 票价 80-200 元</span><span data-en="📍 Jing'an District">📍 静安区</span><a class="map-link" data-en="🗺️ View on map" href="http://api.map.baidu.com/geocoder?address=中国福利会儿童艺术剧场&output=html&src=webapp.shanghaiguide" target="_blank" rel="noopener">🗺️ 百度地图查看</a><a class="xhs-link" data-en="📕 Search Xiaohongshu" href="https://www.xiaohongshu.com/search_result?keyword=中国福利会儿童艺术剧场" target="_blank" rel="noopener">📕 小红书搜一搜</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="tips" id="tips">
+  <div class="tips-inner">
+    <div class="cat-head" style="border-color:rgba(11,18,32,0.15)">
+      <div class="cat-glyph" style="color:var(--jade); font-size:2.6rem;" data-en="Tips">贴士</div>
+      <div>
+        <div class="cat-title-en">Practical Tips</div>
+        <div class="cat-title" data-en="Practical Travel Tips">实用旅行贴士</div>
+      </div>
+    </div>
+    <div class="tips-grid">
+      <div class="tip-block">
+        <h4 data-en="Best Season">最佳季节</h4>
+        <p data-en="Spring (Mar–May) and autumn (Sep–Nov) have the most pleasant weather, great for walking around the Bund and old neighborhoods. Summers are hot and humid, winters occasionally cold and damp — check the forecast before you go.">春季(3-5月)与秋季(9-11月)气候最为宜人,适合步行游览外滩与老街区;夏季闷热多雨,冬季偶有阴冷,出行需留意天气。</p>
+      </div>
+      <div class="tip-block">
+        <h4 data-en="Getting Around">交通出行</h4>
+        <ul>
+          <li data-en="The metro is the most convenient way around the city — download the &quot;Metro Dadu Hui&quot; app or use a transit card">地铁是市内最便捷的交通方式,建议下载"Metro大都会"App 或使用交通卡乘车</li>
+          <li data-en="The Bund, Yu Garden and Nanjing Road are all walkable from one another">外滩、豫园、南京路一带适合步行串联</li>
+          <li data-en="Cross the Huangpu River between Puxi and Pudong by metro or ferry">浦西与浦东之间可乘坐地铁或轮渡穿越黄浦江</li>
+        </ul>
+      </div>
+      <div class="tip-block">
+        <h4 data-en="Payments & Connectivity">支付与网络</h4>
+        <ul>
+          <li data-en="Mobile payment (WeChat/Alipay) covers almost every venue; visitors from abroad can link an international card">移动支付(微信/支付宝)已覆盖绝大多数场所,境外人士可绑定国际卡使用</li>
+          <li data-en="Arrange a local data plan or SIM card ahead of time to make navigation and ride-hailing easier">建议提前准备好本地流量或购买电话卡,方便导航与叫车</li>
+        </ul>
+      </div>
+      <div class="tip-block">
+        <h4 data-en="Booking Tips">预订建议</h4>
+        <ul>
+          <li data-en="Popular restaurants (like Nanxiang Steamed Bun Restaurant) get busy at peak meal times — avoid the rush or arrive early to queue">热门餐厅(如南翔馒头店)建议避开饭点高峰或提前排队</li>
+          <li data-en="Book tickets for Disneyland, Circus World and other popular shows through official channels ahead of time">迪士尼乐园、马戏城等热门演出建议提前在官方渠道购票</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="itinerary">
+      <h4 data-en="3-Day Itinerary">三日行程参考</h4>
+      <div class="day-row">
+        <div class="day-label">DAY 01</div>
+        <p data-en="Morning at the Bund → Nanjing Road Pedestrian Street → Yu Garden & City God Temple snacks → Huangpu River night cruise">外滩晨游 → 南京路步行街 → 豫园与城隍庙小吃 → 夜游黄浦江</p>
+      </div>
+      <div class="day-row">
+        <div class="day-label">DAY 02</div>
+        <p data-en="Xintiandi / Tianzifang stroll → Shanghainese lunch → Lujiazui observation deck → rooftop bar with a view at the Bund">新天地 / 田子坊漫步 → 本帮菜午餐 → 陆家嘴观光厅 → 外滩楼顶酒吧看夜景</p>
+      </div>
+      <div class="day-row">
+        <div class="day-label">DAY 03</div>
+        <p data-en="Coffee walk along Anfu Rd / Wukang Rd → browse galleries at M50 → close the trip with jazz or an acrobatics show">安福路/武康路咖啡漫步 → M50 创意园看展 → 晚间选择爵士乐或杂技演出收尾</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brand" data-en="Shanghai After Hours">海上繁华</div>
+  <div data-en="A city guide written for travelers · Content for reference only — please check official sources for details">一份写给旅人的上海城市指南 · 内容仅供参考,具体信息请以官方渠道为准</div>
+</footer>
+
+<script>
+  // ---------- 语言切换 ----------
+  let currentLang = 'zh';
+  const i18nEls = Array.from(document.querySelectorAll('[data-en]'));
+  i18nEls.forEach(el => { el.dataset.zh = el.textContent; });
+
+  const searchInputEl = document.getElementById('searchInput');
+  searchInputEl.dataset.zhPlaceholder = searchInputEl.getAttribute('placeholder');
+
+  const langToggleBtn = document.getElementById('langToggle');
+
+  function applyLanguage(){
+    const toEn = currentLang === 'en';
+    i18nEls.forEach(el => { el.textContent = toEn ? el.dataset.en : el.dataset.zh; });
+    searchInputEl.setAttribute('placeholder', toEn ? searchInputEl.dataset.enPlaceholder : searchInputEl.dataset.zhPlaceholder);
+    document.documentElement.lang = toEn ? 'en' : 'zh-CN';
+    document.title = toEn ? "Shanghai After Hours · Eat, Drink, Play & Explore" : '海上繁华 · 上海吃喝玩乐指南';
+    langToggleBtn.textContent = toEn ? '中文' : 'EN';
+    if(lastWeatherData){ renderWeather(lastWeatherData); }
+    runSearch();
+    refreshPlayMapPopups();
+  }
+
+  langToggleBtn.addEventListener('click', () => {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    applyLanguage();
+  });
+
+  // ---------- 景点地图总览（Leaflet + OpenStreetMap，免密钥） ----------
+  const landmarks = [
+    {lat:31.2402611, lng:121.490577, zh:'外滩', en:'The Bund', tagZh:'地标', tagEn:'Landmark'},
+    {lat:31.2272355, lng:121.492094, zh:'豫园', en:'Yu Garden', tagZh:'园林', tagEn:'Garden'},
+    {lat:31.234721, lng:121.474898, zh:'南京路步行街', en:'Nanjing Road Pedestrian St.', tagZh:'步行街', tagEn:'Pedestrian St.'},
+    {lat:31.21916, lng:121.474878, zh:'新天地', en:'Xintiandi', tagZh:'洋房街区', tagEn:'Lane Houses'},
+    {lat:31.208812, lng:121.468898, zh:'田子坊', en:'Tianzifang', tagZh:'洋房街区', tagEn:'Lane Houses'},
+    {lat:31.1433969, lng:121.6578713, zh:'上海迪士尼乐园', en:'Shanghai Disneyland', tagZh:'主题乐园', tagEn:'Theme Park'},
+    {lat:31.2396889, lng:121.4997553, zh:'东方明珠', en:'Oriental Pearl Tower', tagZh:'观光', tagEn:'Observation'},
+    {lat:31.21797, lng:121.541078, zh:'上海科技馆', en:'Science & Technology Museum', tagZh:'亲子科普', tagEn:'Family & Science'},
+    {lat:31.235006, lng:121.462662, zh:'上海自然博物馆', en:'Natural History Museum', tagZh:'亲子科普', tagEn:'Family & Science'},
+    {lat:31.317729, lng:121.548686, zh:'共青森林公园', en:'Gongqing Forest Park', tagZh:'亲子户外', tagEn:'Family & Outdoors'}
+  ];
+
+  let playMapInstance = null;
+  let playMapMarkers = [];
+
+  function popupHtml(spot){
+    const toEn = currentLang === 'en';
+    const name = toEn ? spot.en : spot.zh;
+    const tag = toEn ? spot.tagEn : spot.tagZh;
+    return '<b>' + name + '</b><br><span style="font-size:12px;color:#8a5a72;">' + tag + '</span>';
+  }
+
+  function refreshPlayMapPopups(){
+    playMapMarkers.forEach(m => m.setPopupContent(popupHtml(m._spot)));
+  }
+
+  function initPlayMap(){
+    const el = document.getElementById('playMap');
+    if(!el || typeof L === 'undefined') return;
+    playMapInstance = L.map('playMap', { scrollWheelZoom:false }).setView([31.24, 121.52], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(playMapInstance);
+    landmarks.forEach(spot => {
+      const marker = L.marker([spot.lat, spot.lng]).addTo(playMapInstance);
+      marker._spot = spot;
+      marker.bindPopup(popupHtml(spot));
+      playMapMarkers.push(marker);
+    });
+    setTimeout(() => { playMapInstance.invalidateSize(); }, 300);
+  }
+  initPlayMap();
+
+  // ---------- 实时天气（上海，Open-Meteo，免密钥） ----------
+  const weatherCodeMap = {
+    0:['☀️',{zh:'晴朗',en:'Clear'}],1:['🌤️',{zh:'大致晴朗',en:'Mostly clear'}],2:['⛅',{zh:'局部多云',en:'Partly cloudy'}],3:['☁️',{zh:'阴天',en:'Overcast'}],
+    45:['🌫️',{zh:'有雾',en:'Foggy'}],48:['🌫️',{zh:'雾凇',en:'Rime fog'}],
+    51:['🌦️',{zh:'小毛毛雨',en:'Light drizzle'}],53:['🌦️',{zh:'毛毛雨',en:'Drizzle'}],55:['🌧️',{zh:'大毛毛雨',en:'Heavy drizzle'}],
+    61:['🌧️',{zh:'小雨',en:'Light rain'}],63:['🌧️',{zh:'中雨',en:'Rain'}],65:['🌧️',{zh:'大雨',en:'Heavy rain'}],
+    66:['🌧️',{zh:'冻雨',en:'Freezing rain'}],67:['🌧️',{zh:'强冻雨',en:'Heavy freezing rain'}],
+    71:['🌨️',{zh:'小雪',en:'Light snow'}],73:['🌨️',{zh:'中雪',en:'Snow'}],75:['❄️',{zh:'大雪',en:'Heavy snow'}],77:['❄️',{zh:'阵雪粒',en:'Snow grains'}],
+    80:['🌦️',{zh:'阵雨',en:'Rain showers'}],81:['🌧️',{zh:'强阵雨',en:'Heavy showers'}],82:['⛈️',{zh:'暴雨',en:'Violent showers'}],
+    85:['🌨️',{zh:'阵雪',en:'Snow showers'}],86:['❄️',{zh:'强阵雪',en:'Heavy snow showers'}],
+    95:['⛈️',{zh:'雷暴',en:'Thunderstorm'}],96:['⛈️',{zh:'雷暴伴冰雹',en:'Thunderstorm w/ hail'}],99:['⛈️',{zh:'强雷暴伴冰雹',en:'Severe thunderstorm w/ hail'}]
+  };
+
+  let lastWeatherData = null;
+
+  function renderWeather(c){
+    const iconEl = document.getElementById('wIcon');
+    const tempEl = document.getElementById('wTemp');
+    const descEl = document.getElementById('wDesc');
+    const metaEl = document.getElementById('wMeta');
+    const tipEl = document.getElementById('wTip');
+    const loadingEl = document.getElementById('wLoading');
+    const toEn = currentLang === 'en';
+
+    const entry = weatherCodeMap[c.weather_code] || ['🌡️',{zh:'天气数据',en:'Weather data'}];
+    const icon = entry[0];
+    const desc = toEn ? entry[1].en : entry[1].zh;
+
+    iconEl.textContent = icon;
+    tempEl.textContent = Math.round(c.temperature_2m) + '°C';
+    descEl.textContent = toEn
+      ? ('Shanghai · Live ' + desc + ' · Feels like ' + Math.round(c.apparent_temperature) + '°C')
+      : ('上海 · 实时 ' + desc + ' · 体感 ' + Math.round(c.apparent_temperature) + '°C');
+    metaEl.innerHTML = toEn
+      ? ('<span>💧 Humidity ' + c.relative_humidity_2m + '%</span><span>💨 Wind ' + Math.round(c.wind_speed_10m) + ' km/h</span>')
+      : ('<span>💧 湿度 ' + c.relative_humidity_2m + '%</span><span>💨 风速 ' + Math.round(c.wind_speed_10m) + ' km/h</span>');
+
+    let tip = '';
+    if(c.precipitation > 0 || [51,53,55,61,63,65,66,67,80,81,82,95,96,99].includes(c.weather_code)){
+      tip = toEn ? '☔ Bring an umbrella' : '☔ 出门建议带伞';
+    } else if(c.temperature_2m >= 30){
+      tip = toEn ? '🧴 Hot out — stay hydrated and use sunscreen' : '🧴 天气炎热，注意防晒和补水';
+    } else if(c.temperature_2m <= 8){
+      tip = toEn ? '🧥 Chilly — bring an extra layer' : '🧥 气温较低，建议多带件外套';
+    }
+    if(tip){ tipEl.textContent = tip; tipEl.style.display = 'block'; } else { tipEl.style.display = 'none'; }
+
+    loadingEl.style.display = 'none';
+    tempEl.style.display = 'block';
+    descEl.style.display = 'block';
+    metaEl.style.display = 'flex';
+  }
+
+  async function loadWeather(){
+    const loadingEl = document.getElementById('wLoading');
+    const iconEl = document.getElementById('wIcon');
+    try{
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation&timezone=Asia%2FShanghai');
+      if(!res.ok) throw new Error('weather fetch failed');
+      const data = await res.json();
+      lastWeatherData = data.current;
+      renderWeather(lastWeatherData);
+    }catch(err){
+      loadingEl.textContent = currentLang === 'en' ? 'Unable to load live weather right now, please try again later' : '暂时无法获取实时天气，请稍后重试';
+      iconEl.textContent = '⚠️';
+    }
+  }
+  loadWeather();
+  setInterval(loadWeather, 10 * 60 * 1000); // 每10分钟刷新一次
+
+  // ---------- 实时查询 / 关键词过滤 ----------
+  const searchCount = document.getElementById('searchCount');
+  const noResults = document.getElementById('noResults');
+  const allCards = Array.from(document.querySelectorAll('.card'));
+
+  function runSearch(){
+    const q = searchInputEl.value.trim().toLowerCase();
+    let visible = 0;
+    allCards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = q === '' || text.includes(q);
+      card.classList.toggle('is-hidden', !match);
+      if(match) visible++;
+    });
+    searchCount.textContent = q === '' ? '' : (currentLang === 'en' ? (visible + ' matches') : ('匹配 ' + visible + ' 项'));
+    noResults.classList.toggle('show', q !== '' && visible === 0);
+  }
+
+  searchInputEl.addEventListener('input', runSearch);
+</script>
+
+</body>
+</html>
